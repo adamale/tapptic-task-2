@@ -24,12 +24,12 @@ class User extends Model
 
     public function likedUsers(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'likes', 'user_a_id', 'user_b_id');
+        return $this->belongsToMany(User::class, Like::class, 'user_a_id', 'user_b_id');
     }
 
     public function usersLikedBy(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'likes', 'user_b_id', 'user_a_id');
+        return $this->belongsToMany(User::class, Like::class, 'user_b_id', 'user_a_id');
     }
 
     public function pairs(): BelongsToMany
