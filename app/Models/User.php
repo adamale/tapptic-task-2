@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property int $id
  * @property string $name
  * @property \Illuminate\Support\Collection<\App\Models\User> $likedUsers
- * @property \Illuminate\Support\Collection<\App\Models\User> $likedBy
+ * @property \Illuminate\Support\Collection<\App\Models\User> $usersLikedBy
  */
 class User extends Model
 {
@@ -27,18 +27,45 @@ class User extends Model
         return $this->belongsToMany(User::class, 'likes', 'user_a_id', 'user_b_id');
     }
 
-    public function likedBy(): BelongsToMany
+    public function usersLikedBy(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'likes', 'user_b_id', 'user_a_id');
     }
 
-    public function like(User $user)
+    public function pairs(): BelongsToMany
     {
-        $this->likedUsers()->syncWithoutDetaching($user->getKey());
+        return $this->belongsToMany(User::class, 'pairs', 'user_a_id', 'user_b_id');
     }
 
-    public function unlike(User $user)
+    public function like(User $likedUser)
     {
-        $this->likedUsers()->detach($user->getKey());
+        $this->likedUsers()->syncWithoutDetaching($likedUser->getKey());
+
+        if ($this->isLikedBy($likedUser)) {
+            $this->pairWith($likedUser);
+        }
+    }
+
+    public function unlike(User $unlikedUser)
+    {
+        $this->likedUsers()->detach($unlikedUser->getKey());
+        $this->unpairWith($unlikedUser);
+    }
+
+    public function isLikedBy(User $user): bool
+    {
+        return $this->usersLikedBy->contains($user);
+    }
+
+    public function pairWith(User $user)
+    {
+        $this->pairs()->syncWithoutDetaching($user->getKey());
+        $user->pairs()->syncWithoutDetaching($this->getKey());
+    }
+
+    public function unpairWith(User $user)
+    {
+        $this->pairs()->detach($user->getKey());
+        $user->pairs()->detach($this->getKey());
     }
 }
