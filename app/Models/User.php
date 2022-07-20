@@ -31,4 +31,14 @@ class User extends Model
     {
         return $this->belongsToMany(User::class, 'likes', 'user_b_id', 'user_a_id');
     }
+
+    public function like(User $user)
+    {
+        $this->likedUsers()->syncWithoutDetaching($user->getKey());
+    }
+
+    public function unlike(User $user)
+    {
+        $this->likedUsers()->detach($user->getKey());
+    }
 }
