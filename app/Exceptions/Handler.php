@@ -47,4 +47,13 @@ class Handler extends ExceptionHandler
             //
         });
     }
+
+    protected function convertExceptionToArray(Throwable $e)
+    {
+        return [
+            'data' => parent::convertExceptionToArray($e),
+            'success' => false,
+            'message' => $e->getMessage(),
+        ];
+    }
 }
